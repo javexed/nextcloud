@@ -1,28 +1,32 @@
 # Nextcloud
 
+export DB_PASSWORD=`pwgen -Bs1 12`
+
 A safe home for all your data. Access & share your files, calendars, contacts, mail & more from any device, on your terms.
 
 # About this image
 
 The purpose of this nextcloud config is to enable a simple nextcloud instance running with https enabled. Self-signed certs can be created or replace with real ones.
 
-This image is based on a couple of sources [indiehosters/nextcloud] (https://github.com/indiehosters/nextcloud) and the official [nextcloud docker] (https://github.com/nextcloud/docker) site
+This compose is originally based on [indiehosters/nextcloud] and then modified for linux servers io (https://www.linuxserver.io/)
 
-# How to use this image
-
-The easiest is to use our `docker-compose.yml`.
-
-Make sure you have [docker-compose](http://docs.docker.com/compose/install/) installed. And then:
-
-## Create your self-signed certs
-````bash
- ./scripts/create_ssl
-````
+Please see https://hub.docker.com/r/linuxserver/nextcloud for more details on how to use this container.
 
 ## Set your variables
+Set the db passwords
+
 ````bash
- cat MYSQL_ROOT_PASSWORD=mystrongpassword >> .env
- cat MYSQL_PASSWORD=mystrongpassword >> .env
+ PASS=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+ echo MYSQL_ROOT_PASSWORD=$PASS >> .env
+ echo MYSQL_PASSWORD=$PASS >> .env
+````
+
+NOTE: change the mystrongpassword to whatever you wish
+
+Modify the user id to be your user id, which can by found by doing:
+````bash
+ id username
+ uid=1000(dockeruser) gid=100(dockergroup) groups=100(dockergroup)
 ````
 
 ## Start your containers
@@ -30,11 +34,7 @@ Make sure you have [docker-compose](http://docs.docker.com/compose/install/) ins
  docker-compose up -d
 ````
 
-You can now access your instance on the port 80 of the IP of your machine (not recommended for production).
-
-## Access it from Internet
-
-If you wish to access from the internet, it is recommended that you go to the official [nextcloud docker] (https://github.com/nextcloud/docker).
+You can now access your instance on the port 443 of the IP of your machine.
 
 ## Installation
 
@@ -43,9 +43,9 @@ At the `Database Setup` step, please enter the following:
 
   -  database user: nextcloud
   -  database password: mystrongpassword
-  -  database name: nextcloud 
+  -  database name: nextcloud
   -  database server: db
- 
+
 And leave the rest as default.
 
-Then you can continue the installation with the super user.
+Then you can continue the installation with the admin user.
