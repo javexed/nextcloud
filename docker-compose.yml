@@ -1,52 +1,33 @@
-version: '2'
-
-networks:
-  proxy-tier:
-    external: true
-  back:
-    driver: bridge
-
-volumes:
-  nextcloud:
-  db:
-
+---
+version: "2"
 services:
-  db:
-    image: mariadb
-    restart: always
-    volumes:
-      - db:/var/lib/mysql
+  nextcloud:
+    image: linuxserver/nextcloud
+    container_name: nextcloud
     environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - ./config:/config
+      - ./data:/data
+    links:
+      - db
+    ports:
+      - 443:443
+    restart: unless-stopped
+  db:
+    image: linuxserver/mariadb
+    container_name: mariadb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MYSQL_ROOT_PASSWORD=DATABASE PASSWORD
+      - TZ=America/Toronto
       - MYSQL_ROOT_PASSWORD
       - MYSQL_PASSWORD
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
-    networks:
-      - back
-
-  app:
-    image: nextcloud:fpm
-    links:
-      - db
     volumes:
-      - nextcloud:/var/www/html
-    restart: always
-    networks:
-      - back
-
-  web:
-    image: nginx
-    ports:
-      - 80:80
-      - 443:443
-    links:
-      - app
-    volumes:
-      - ./nginx.ssl.conf:/etc/nginx/nginx.conf:ro,Z
-      - ./ssl:/etc/ssl:ro,Z
-    volumes_from:
-      - app
-    restart: always
-    networks:
-      - back
-      - proxy-tier
+      - ./config:/config
+    restart: unless-stopped
